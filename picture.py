@@ -11,15 +11,26 @@ def show_opened_image(image):
     cv2.destroyAllWindows()
 
 
-def canny_edge_detector(data_dir, dst_dir, f, debug_mode=0):
+def my_canny(img, param=0.33):
+	median = np.median(img)
+
+	lower_limit = int(max(0, (1.0-param)*median))
+	upper_limit = int(min(255, (1.0+param)*median))
+	res = cv2.Canny(img, lower_limit, upper_limit)
+	return res
+
+def canny_edge_detector(data_dir, dst_dir, f, auto=1, debug_mode=0):
 
     img = cv2.imread(os.path.join(data_dir,f),-1)
-    edges = cv2.Canny(img,100,200)
+    if auto == 1:
+        edges = auto_canny(img)
+    else:
+        edges = cv2.Canny(img,100,200)
+    s = "edges_{}".format(f)
     if debug_mode == 1:
         show_opened_image(edges)
-    print(edges.shape)
-    s = "edges_{}".format(f)
-    print(s)
+        print(edges.shape)
+        print(s)
     tmp_img = Image.fromarray(edges)
     tmp_img.save(os.path.join(dst_dir, s))
 

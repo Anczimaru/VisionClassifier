@@ -17,7 +17,12 @@ def main(debug_mode=0):
     #IF NO FILES DO EDGE DETECTION
     prepare_data(picture.canny_edge_detector, data_CHIC_dir, edges_dir, s_base_edge_name)
 
-    evaluate_union(edges_dir, s_base_edge_name)
+    log_file = open("log_file.txt","w")
+    evaluate_union(edges_dir, s_base_edge_name, log_file)
+
+
+
+    log_file.close()
     print("Done")
 
 
@@ -61,7 +66,7 @@ def baseline_avg_CHIC(dst_dir,name, debug_mode=0):
     temp_img.save(os.path.join(dst_dir, name))
 
 
-def evaluate_union(src_dir, baseline_picture, debug_mode = 0):
+def evaluate_union(src_dir, baseline_picture,log_file, debug_mode = 0):
 
     #ESTABLISH BASELINE
     print("Preparing baseline")
@@ -75,7 +80,6 @@ def evaluate_union(src_dir, baseline_picture, debug_mode = 0):
         picture.show_opened_image(base_img)
     print("Established baseline_picture")
 
-    log_file = open("log_file.txt","w")
     #GET DATA
     list = os.listdir(src_dir)
     list.sort()
@@ -95,7 +99,6 @@ def evaluate_union(src_dir, baseline_picture, debug_mode = 0):
         s_results = "For picture {} we got result of {}% against baseline \n".format(f,similarity_percentage)
         log_file.write(s_results)
 
-    log_file.close()
 
     return 0
 

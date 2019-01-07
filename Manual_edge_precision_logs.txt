@@ -1,0 +1,21 @@
+For picture edges_Scene1_IM_Level1(inside_light).jpg we got result of 0.0% against baseline 
+For picture edges_Scene1_IM_Level1.jpg we got result of 0.0% against baseline 
+For picture edges_Scene1_IM_Level10(without fog, inside light).jpg we got result of 0.6309023331709142% against baseline 
+For picture edges_Scene1_IM_Level10(without_fog).jpg we got result of 0.6312309487926209% against baseline 
+For picture edges_Scene1_IM_Level2(inside_light).jpg we got result of 0.0% against baseline 
+For picture edges_Scene1_IM_Level2.jpg we got result of 0.0% against baseline 
+For picture edges_Scene1_IM_Level3(inside_light).jpg we got result of 0.0% against baseline 
+For picture edges_Scene1_IM_Level3.jpg we got result of 0.0% against baseline 
+For picture edges_Scene1_IM_Level4(inside_light).jpg we got result of 0.0% against baseline 
+For picture edges_Scene1_IM_Level4.jpg we got result of 0.0% against baseline 
+For picture edges_Scene1_IM_Level5(inside_light).jpg we got result of 0.03000033994719487% against baseline 
+For picture edges_Scene1_IM_Level5.jpg we got result of 0.031218484062142348% against baseline 
+For picture edges_Scene1_IM_Level6(inside_light).jpg we got result of 0.10767827397477592% against baseline 
+For picture edges_Scene1_IM_Level6.jpg we got result of 0.1156217067615497% against baseline 
+For picture edges_Scene1_IM_Level7(inside_light).jpg we got result of 0.15064759940622557% against baseline 
+For picture edges_Scene1_IM_Level7.jpg we got result of 0.1435710319663679% against baseline 
+For picture edges_Scene1_IM_Level8(inside_light).jpg we got result of 0.3502759238065021% against baseline 
+For picture edges_Scene1_IM_Level8.jpg we got result of 0.3575961200693492% against baseline 
+For picture edges_Scene1_IM_Level9(inside_light).jpg we got result of 0.48685537513172955% against baseline 
+For picture edges_Scene1_IM_Level9.jpg we got result of 0.49369397953517885% against baseline 
+For picture edges_Scene1_IM_Original(without_fog).jpg we got result of 0.63314598465705% against baseline 
