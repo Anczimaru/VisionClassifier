@@ -4,11 +4,6 @@ import os
 from matplotlib import pyplot as plt
 import cv2
 
-root_dir = "."
-data_dir = os.path.join(root_dir,'data')
-edges_dir = os.path.join(root_dir,"edges")
-
-
 def show_opened_image(image):
 
     cv2.imshow('image',image)
@@ -16,7 +11,7 @@ def show_opened_image(image):
     cv2.destroyAllWindows()
 
 
-def canny_edge_detector(data_dir,f, debug_mode=0):
+def canny_edge_detector(data_dir, dst_dir, f, debug_mode=0):
 
     img = cv2.imread(os.path.join(data_dir,f),-1)
     edges = cv2.Canny(img,100,200)
@@ -26,7 +21,7 @@ def canny_edge_detector(data_dir,f, debug_mode=0):
     s = "edges_{}".format(f)
     print(s)
     tmp_img = Image.fromarray(edges)
-    tmp_img.save(os.path.join(edges_dir, s))
+    tmp_img.save(os.path.join(dst_dir, s))
 
 def segmentation(data_dir,f,debug_mode=0):
     #ACCORDING TO CV2 documentation
@@ -64,6 +59,22 @@ def segmentation(data_dir,f,debug_mode=0):
     img[markers == -1] = [255,0,0]
     if debug_mode == 1:
         show_opened_image(img)
+
+def whiteunion3d(img1, img2,debug_mode = 0):
+    #Do union of 3d matrixes for white color
+    if debug_mode ==1:
+        print(img1.shape)
+    hsv1 = cv2.cvtColor(img1, cv2.COLOR_BGR2HSV)
+    hsv2 = cv2.cvtColor(img2, cv2.COLOR_BGR2HSV)
+    lower_white = np.array([0,0,0], dtype=np.uint8)
+    upper_white = np.array([0,0,255], dtype=np.uint8)
+     # Threshold the HSV image to get only white colors
+    mask = cv2.inRange(hsv1, lower_white, upper_white)
+    # Bitwise-AND mask and original image
+    res = cv2.bitwise_and(img1,img2, mask= mask)
+    return res
+
+
 
 def downsample(data_dir,f,n):
     return 0

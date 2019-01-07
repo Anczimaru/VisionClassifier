@@ -7,19 +7,43 @@ import cv2
 
 #main variables to change to separate file later on
 root_dir = "."
-data_dir = os.path.join(root_dir,'data_CHIC')
+data_dir = os.path.join(root_dir,'data')
+data_CHIC_dir = os.path.join(root_dir,'data_CHIC')
 edges_dir = os.path.join(root_dir,"edges")
 
 
 
 def main(debug_mode=0):
+    #IF NO FILES DO EDGE DETECTION
+    if len(os.listdir(edges_dir)) == 0:
+        print("Empty edges dir, extracting data")
+        list = os.listdir(data_CHIC_dir)
+        for f in list:
+            picture.canny_edge_detector(data_CHIC_dir, edges_dir, f, debug_mode = debug_mode)
+
+    #get baseline for futher experiment
+    baseline_picture = os.path.join (data_dir,"baseline_picture.jpg")
+    if not os.path.exists(baseline_picture):
+        baseline_avg_CHIC(data_dir,debug_mode=debug_mode)
+
+    print("Done")
+
+
+
+
+
+
+
+def baseline_avg_CHIC(dst_dir, debug_mode=0):
+    #script for averaging no-fog photos from downsampled CHIC dataset
     avg_img = np.zeros((1200,1800,3))
     FLAG_1ST_MATRIX = 0
     list = os.listdir(edges_dir)
     for f in list:
         a = int("".join(filter(str.isdigit, f)))
         if (a == 1 or a==110):
-            print(f)
+            if debug_mode == 1:
+                print(f)
             temp_img = cv2.imread(os.path.join(edges_dir,f))
             if debug_mode ==1:
                 picture.show_opened_image(temp_img)
@@ -27,25 +51,19 @@ def main(debug_mode=0):
                 avg_img = temp_img
                 FLAG_1ST_MATRIX+=1
             else:
-                avg_img = whiteunion3d(avg_img,temp_img)
-    print("Done")
-    picture.show_opened_image(avg_img)
+                avg_img = picture.whiteunion3d(avg_img,temp_img,debug_mode=debug_mode)
+    print("Extracted baseline picture")
+    if debug_mode == 1:
+        picture.show_opened_image(avg_img)
+
+    temp_img = Image.fromarray(avg_img)
+    temp_img.save(os.path.join(dst_dir,"baseline_picture.jpg"))
 
 
-def whiteunion3d(img1, img2):
-    print(img1.shape)
-    hsv1 = cv2.cvtColor(img1, cv2.COLOR_BGR2HSV)
-    hsv2 = cv2.cvtColor(img2, cv2.COLOR_BGR2HSV)
-    lower_white = np.array([0,0,0], dtype=np.uint8)
-    upper_white = np.array([0,0,255], dtype=np.uint8)
-     # Threshold the HSV image to get only white colors
-    mask = cv2.inRange(hsv1, lower_white, upper_white)
-    # Bitwise-AND mask and original image
-    res = cv2.bitwise_and(img1,img2, mask= mask)
+def evaluate_union(src_dir, baseline_picture):
 
 
-
-    return res
+    return 0
 
 
 
