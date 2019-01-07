@@ -4,27 +4,48 @@ import sys
 import os
 from PIL import Image
 import cv2
+from matplotlib import pyplot as plt
 
 #main variables to change to separate file later on
 root_dir = "."
 data_dir = os.path.join(root_dir,'data')
-data_CHIC_dir = os.path.join(root_dir,'data_CHIC')
-edges_dir = os.path.join(root_dir,"edges")
+data_CHIC_dir = os.path.join(data_dir,'data_CHIC')
+edges_dir = os.path.join(data_dir,"edges")
+laplacian_dir = os.path.join(data_dir,"laplacian")
+feature_dir = os.path.join(data_dir, "feature")
+feature_dir_bf = os.path.join(feature_dir,"BF")
+feature_dir_flann = os.path.join(feature_dir,"FLANN")
+directories = (data_dir, edges_dir, laplacian_dir, feature_dir, feature_dir_bf, feature_dir_flann)
 s_base_edge_name = "baseline_edge_picture.jpg"
+s_base_laplace_name = "baseline_laplace_picture.jpg"
+checker_img_path = os.path.join(data_dir,'checker.JPG')
 
-
+################################################################################
 def main(debug_mode=0):
+    for f in directories:
+        if not os.path.exists(f):
+            os.mkdir(f)
+            s = "Making directory {}".format(f)
+    """
     #IF NO FILES DO EDGE DETECTION
     prepare_data(picture.canny_edge_detector, data_CHIC_dir, edges_dir, s_base_edge_name)
 
-    log_file = open("log_file.txt","w")
-    evaluate_union(edges_dir, s_base_edge_name, log_file)
-
-
-
+    prepare_data(picture.laplacian,data_CHIC_dir,laplacian_dir, s_base_laplace_name)
+    log_file = open("log_edge.txt","w")
+    #evaluate_union(edges_dir, s_base_edge_name, log_file)
     log_file.close()
+    log_file = open("log_laplacian.txt","w")
+    evaluate_union(laplacian_dir,s_base_laplace_name,log_file)
+    log_file.close()
+    """
+    list = os.listdir(data_CHIC_dir)
+
+    for f in list:
+        picture.feature_matcher(data_CHIC_dir, feature_dir, f, checker_img_path, mode = 1)
+        picture.feature_matcher(data_CHIC_dir, feature_dir, f, checker_img_path, mode = 2)
     print("Done")
 
+################################################################################
 
 def prepare_data(function, src_dir, dst_dir,s_base_pic_name, debug_mode = 0):
     if len(os.listdir(dst_dir)) == 0:
@@ -35,22 +56,24 @@ def prepare_data(function, src_dir, dst_dir,s_base_pic_name, debug_mode = 0):
             function(src_dir, dst_dir, f, debug_mode = debug_mode)
 
         #get baseline for futher experiment
-        baseline_picture = os.path.join (data_dir,s_base_edge_name)
+        baseline_picture = os.path.join (data_dir,s_base_pic_name)
         if not os.path.exists(baseline_picture):
-            baseline_avg_CHIC(data_dir,s_base_pic_name, debug_mode=debug_mode)
+            baseline_avg_CHIC(dst_dir, data_dir, s_base_pic_name, debug_mode=debug_mode)
 
 
-def baseline_avg_CHIC(dst_dir,name, debug_mode=0):
+def baseline_avg_CHIC(src_dir, dst_dir,name, debug_mode=0):
     #script for averaging no-fog photos from downsampled CHIC dataset
+    s = "Extracting {} from {} directory".format(name, src_dir)
+    print(s)
     avg_img = np.zeros((1200,1800,3))
     FLAG_1ST_MATRIX = 0
-    list = os.listdir(edges_dir)
+    list = os.listdir(src_dir)
     for f in list:
         a = int("".join(filter(str.isdigit, f)))
         if (a == 1 or a==110):
             if debug_mode == 1:
                 print(f)
-            temp_img = cv2.imread(os.path.join(edges_dir,f))
+            temp_img = cv2.imread(os.path.join(src_dir,f))
             if debug_mode ==1:
                 picture.show_opened_image(temp_img)
             if FLAG_1ST_MATRIX == 0:
@@ -101,6 +124,7 @@ def evaluate_union(src_dir, baseline_picture,log_file, debug_mode = 0):
 
 
     return 0
+
 
 
 
