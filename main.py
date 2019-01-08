@@ -5,6 +5,8 @@ import os
 from PIL import Image
 import cv2
 from matplotlib import pyplot as plt
+from functools import wraps
+from time import time
 
 #main variables to change to separate file later on
 root_dir = "."
@@ -12,32 +14,67 @@ data_dir = os.path.join(root_dir,'data')
 data_CHIC_dir = os.path.join(data_dir,'data_CHIC')
 edges_dir = os.path.join(data_dir,"edges")
 laplacian_dir = os.path.join(data_dir,"laplacian")
+sobel_x_dir = os.path.join(data_dir,"sobel_x")
+sobel_y_dir = os.path.join(data_dir,"sobel_y")
 feature_dir = os.path.join(data_dir, "feature")
 feature_dir_bf = os.path.join(feature_dir,"BF")
 feature_dir_flann = os.path.join(feature_dir,"FLANN")
-directories = (data_dir, edges_dir, laplacian_dir, feature_dir, feature_dir_bf, feature_dir_flann)
+directories = (data_dir, edges_dir, laplacian_dir,sobel_x_dir, sobel_y_dir, feature_dir, feature_dir_bf, feature_dir_flann)
 s_base_edge_name = "baseline_edge_picture.jpg"
 s_base_laplace_name = "baseline_laplace_picture.jpg"
+s_base_sobel_x_name = "baseline_sobelx_picture.jpg"
+s_base_sobel_y_name = "baseline_sobely_picture.jpg"
 checker_img_path = os.path.join(data_dir,'checker.JPG')
 
+
+###############################################################################
+def timing(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        start = time()
+        result = f(*args, **kwargs)
+        end = time()
+        print ('Elapsed time: {}'.format(end-start))
+        return result
+    return wrapper
+
+
 ################################################################################
+@timing
 def main(debug_mode=0):
     for f in directories:
         if not os.path.exists(f):
             os.mkdir(f)
             s = "Making directory {}".format(f)
-    """
+
     #IF NO FILES DO EDGE DETECTION
     prepare_data(picture.canny_edge_detector, data_CHIC_dir, edges_dir, s_base_edge_name)
 
-    prepare_data(picture.laplacian,data_CHIC_dir,laplacian_dir, s_base_laplace_name)
-    log_file = open("log_edge.txt","w")
-    #evaluate_union(edges_dir, s_base_edge_name, log_file)
+    prepare_data(picture.laplacian, data_CHIC_dir, laplacian_dir, s_base_laplace_name)
+
+    prepare_data(picture.sobel_x, data_CHIC_dir, sobel_x_dir, s_base_sobel_x_name)
+
+    prepare_data(picture.sobel_y, data_CHIC_dir, sobel_y_dir, s_base_sobel_y_name)
+
+    with open("log_edge.txt","w") as log_file:
+        print("Evaluating edges")
+        evaluate_union(edges_dir, s_base_edge_name, log_file)
+
+    with open("log_laplacian.txt","w") as log_file:
+        print("Evaluating laplacian")
+        evaluate_union(laplacian_dir,s_base_laplace_name,log_file)
+
+    with open("log_sobel_x.txt","w") as log_file:
+        print("Evaluating sobel_x")
+        evaluate_union(laplacian_dir,s_base_sobel_x_name,log_file)
+
+
+    with open("log_sobel_y.txt","w") as log_file:
+        print("Evaluating sobel_y")
+        evaluate_union(laplacian_dir,s_base_sobel_y_name,log_file)
+
+
     log_file.close()
-    log_file = open("log_laplacian.txt","w")
-    evaluate_union(laplacian_dir,s_base_laplace_name,log_file)
-    log_file.close()
-    """
     list = os.listdir(data_CHIC_dir)
 
     for f in list:
@@ -60,7 +97,7 @@ def prepare_data(function, src_dir, dst_dir,s_base_pic_name, debug_mode = 0):
         if not os.path.exists(baseline_picture):
             baseline_avg_CHIC(dst_dir, data_dir, s_base_pic_name, debug_mode=debug_mode)
 
-
+################################################################################
 def baseline_avg_CHIC(src_dir, dst_dir,name, debug_mode=0):
     #script for averaging no-fog photos from downsampled CHIC dataset
     s = "Extracting {} from {} directory".format(name, src_dir)
@@ -88,14 +125,15 @@ def baseline_avg_CHIC(src_dir, dst_dir,name, debug_mode=0):
     temp_img = Image.fromarray(avg_img)
     temp_img.save(os.path.join(dst_dir, name))
 
-
+@timing
 def evaluate_union(src_dir, baseline_picture,log_file, debug_mode = 0):
 
     #ESTABLISH BASELINE
-    print("Preparing baseline")
+    #print("Preparing baseline")
     base_img = cv2.imread(os.path.join(data_dir,baseline_picture))
     base_img_gray = cv2.cvtColor(base_img, cv2.COLOR_BGR2GRAY)
     base_pixels = 0
+    #get number of baseline pixels
     for x in range(base_img_gray.shape[0]):
         for y in range(base_img_gray.shape[1]):
             if base_img_gray[x,y] >=1: base_pixels+=1
@@ -106,25 +144,41 @@ def evaluate_union(src_dir, baseline_picture,log_file, debug_mode = 0):
     #GET DATA
     list = os.listdir(src_dir)
     list.sort()
+    similarity_multiplier = 0
+    res_list = []
+    #EXTRACT UNION
     for f in list:
-        #EXTRACT UNION
         temp_pic = cv2.imread(os.path.join(src_dir,f))
+        #calculate union
         res_pic = cv2.bitwise_and(base_img,temp_pic)
         res_pic_gray = cv2.cvtColor(res_pic, cv2.COLOR_BGR2GRAY)
         if debug_mode == 1:
             picture.show_opened_image(res_pic_gray)
         similarity = 0
+        #get similarity
         for x in range(res_pic_gray.shape[0]):
             for y in range(res_pic_gray.shape[1]):
                 if res_pic_gray[x,y] >=1: similarity+=1
 
         similarity_percentage = similarity/base_pixels
-        s_results = "For picture {} we got result of {}% against baseline \n".format(f,similarity_percentage)
+
+        #calculate coefficient
+        a = int("".join(filter(str.isdigit, f)))
+        if (a == 1 or a==110):
+            similarity_multiplier +=similarity_percentage
+
+        res_list.append((f,similarity_percentage))
+    similarity_multiplier = 100/(similarity_multiplier/3)
+    print(similarity_multiplier)
+
+    #WRITE RESULTS TO LOG FILES
+    for i in range(len(res_list)):
+        a = res_list[i]
+        s_results = ("For picture {} we got result of {}% against baseline \n".format(a[0],a[1]*similarity_multiplier))
         log_file.write(s_results)
 
 
     return 0
-
 
 
 

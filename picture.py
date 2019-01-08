@@ -19,6 +19,21 @@ def my_canny(img, param=0.33):
 	res = cv2.Canny(img, lower_limit, upper_limit)
 	return res
 
+
+def sobel_x(data_dir, dst_dir, f, debug_mode = 0):
+    img = cv2.imread(os.path.join(data_dir,f),0)
+    sobel_x = cv2.Sobel(img,cv2.CV_64F,1,0,ksize=5)
+    s = "sobel_x_{}".format(f)
+    cv2.imwrite(os.path.join(dst_dir,s),sobel_x)
+
+
+def sobel_y(data_dir, dst_dir, f, debug_mode = 0):
+    img = cv2.imread(os.path.join(data_dir,f),0)
+    sobel_y = cv2.Sobel(img,cv2.CV_64F,0,1,ksize=5)
+    s = "sobel_y_{}".format(f)
+    cv2.imwrite(os.path.join(dst_dir,s),sobel_y)
+
+
 def canny_edge_detector(data_dir, dst_dir, f, auto = 1, debug_mode = 0):
 
     img = cv2.imread(os.path.join(data_dir,f),-1)
@@ -157,7 +172,7 @@ def feature_matcher(src_dir, dst_dir, f, test_img_path, mode=1):
         s = "feature_{}".format(f)
         cv2.imwrite(os.path.join(dst_dir,s),img3)
         return 0
-    #Error handling 
+    #Error handling
     except cv2.error as e:
         print("Not able to find matches if levels under 4, ommit")
         print(e)

@@ -1,0 +1,21 @@
+For picture edges_Scene1_IM_Level1(inside_light).jpg we got result of 0.0% against baseline 
+For picture edges_Scene1_IM_Level1.jpg we got result of 0.0% against baseline 
+For picture edges_Scene1_IM_Level10(without fog, inside light).jpg we got result of 99.90940856736121% against baseline 
+For picture edges_Scene1_IM_Level10(without_fog).jpg we got result of 99.969263621069% against baseline 
+For picture edges_Scene1_IM_Level2(inside_light).jpg we got result of 0.0% against baseline 
+For picture edges_Scene1_IM_Level2.jpg we got result of 0.0% against baseline 
+For picture edges_Scene1_IM_Level3(inside_light).jpg we got result of 0.0% against baseline 
+For picture edges_Scene1_IM_Level3.jpg we got result of 0.0% against baseline 
+For picture edges_Scene1_IM_Level4(inside_light).jpg we got result of 0.21434580044001555% against baseline 
+For picture edges_Scene1_IM_Level4.jpg we got result of 0.2127280962857513% against baseline 
+For picture edges_Scene1_IM_Level5(inside_light).jpg we got result of 7.604018377119194% against baseline 
+For picture edges_Scene1_IM_Level5.jpg we got result of 7.900058237349555% against baseline 
+For picture edges_Scene1_IM_Level6(inside_light).jpg we got result of 21.32214960528019% against baseline 
+For picture edges_Scene1_IM_Level6.jpg we got result of 28.605053707777927% against baseline 
+For picture edges_Scene1_IM_Level7(inside_light).jpg we got result of 30.903002458910322% against baseline 
+For picture edges_Scene1_IM_Level7.jpg we got result of 33.11602174194384% against baseline 
+For picture edges_Scene1_IM_Level8(inside_light).jpg we got result of 71.45641905008414% against baseline 
+For picture edges_Scene1_IM_Level8.jpg we got result of 66.22638151934775% against baseline 
+For picture edges_Scene1_IM_Level9(inside_light).jpg we got result of 91.24660282127607% against baseline 
+For picture edges_Scene1_IM_Level9.jpg we got result of 87.69493335058885% against baseline 
+For picture edges_Scene1_IM_Original(without_fog).jpg we got result of 100.12132781156984% against baseline 
