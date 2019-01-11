@@ -7,6 +7,7 @@ import cv2
 from matplotlib import pyplot as plt
 from functools import wraps
 from time import time
+import re
 
 #main variables to change to separate file later on
 root_dir = "."
@@ -41,45 +42,49 @@ def timing(f):
 
 ################################################################################
 @timing
-def main(debug_mode=0):
+def main(debug_mode=0, full_run = 0):
     for f in directories:
         if not os.path.exists(f):
             os.mkdir(f)
             s = "Making directory {}".format(f)
+    if (full_run == 1):
+        #IF NO FILES DO EDGE DETECTION
+        prepare_data(picture.canny_edge_detector, data_CHIC_dir, edges_dir, s_base_edge_name)
 
-    #IF NO FILES DO EDGE DETECTION
-    prepare_data(picture.canny_edge_detector, data_CHIC_dir, edges_dir, s_base_edge_name)
+        prepare_data(picture.laplacian, data_CHIC_dir, laplacian_dir, s_base_laplace_name)
 
-    prepare_data(picture.laplacian, data_CHIC_dir, laplacian_dir, s_base_laplace_name)
+        prepare_data(picture.sobel_x, data_CHIC_dir, sobel_x_dir, s_base_sobel_x_name)
 
-    prepare_data(picture.sobel_x, data_CHIC_dir, sobel_x_dir, s_base_sobel_x_name)
+        prepare_data(picture.sobel_y, data_CHIC_dir, sobel_y_dir, s_base_sobel_y_name)
 
-    prepare_data(picture.sobel_y, data_CHIC_dir, sobel_y_dir, s_base_sobel_y_name)
+        with open("log_edge.txt","w") as log_file:
+            print("Evaluating edges")
+            evaluate_union(edges_dir, s_base_edge_name, log_file)
 
-    with open("log_edge.txt","w") as log_file:
-        print("Evaluating edges")
-        evaluate_union(edges_dir, s_base_edge_name, log_file)
+        with open("log_laplacian.txt","w") as log_file:
+            print("Evaluating laplacian")
+            evaluate_union(laplacian_dir,s_base_laplace_name,log_file)
 
-    with open("log_laplacian.txt","w") as log_file:
-        print("Evaluating laplacian")
-        evaluate_union(laplacian_dir,s_base_laplace_name,log_file)
-
-    with open("log_sobel_x.txt","w") as log_file:
-        print("Evaluating sobel_x")
-        evaluate_union(laplacian_dir,s_base_sobel_x_name,log_file)
-
-
-    with open("log_sobel_y.txt","w") as log_file:
-        print("Evaluating sobel_y")
-        evaluate_union(laplacian_dir,s_base_sobel_y_name,log_file)
+        with open("log_sobel_x.txt","w") as log_file:
+            print("Evaluating sobel_x")
+            evaluate_union(sobel_x_dir,s_base_sobel_x_name,log_file)
 
 
-    log_file.close()
-    list = os.listdir(data_CHIC_dir)
+        with open("log_sobel_y.txt","w") as log_file:
+            print("Evaluating sobel_y")
+            evaluate_union(sobel_y_dir,s_base_sobel_y_name,log_file)
 
-    for f in list:
-        picture.feature_matcher(data_CHIC_dir, feature_dir, f, checker_img_path, mode = 1)
-        picture.feature_matcher(data_CHIC_dir, feature_dir, f, checker_img_path, mode = 2)
+
+        log_file.close()
+        list = os.listdir(data_CHIC_dir)
+
+        for f in list:
+            picture.feature_matcher(data_CHIC_dir, feature_dir, f, checker_img_path, mode = 1)
+            picture.feature_matcher(data_CHIC_dir, feature_dir, f, checker_img_path, mode = 2)
+    merge_results()
+    show_result_on_picture("Level10(without_fog)")
+    show_result_on_picture("Level01")
+    show_result_on_picture("Level05")
     print("Done")
 
 ################################################################################
@@ -143,7 +148,7 @@ def evaluate_union(src_dir, baseline_picture,log_file, debug_mode = 0):
 
     #GET DATA
     list = os.listdir(src_dir)
-    list.sort()
+    list.sort() # LIST SORT == IMPORTANT THING!
     similarity_multiplier = 0
     res_list = []
     #EXTRACT UNION
@@ -180,6 +185,91 @@ def evaluate_union(src_dir, baseline_picture,log_file, debug_mode = 0):
 
     return 0
 
+def show_result_on_picture(index):
+    for f in os.listdir(data_CHIC_dir):
+        level = find_level_unmerged(f)
+        if level == index:
+            with open("merged_logs.txt", "r") as log_file:
+                lines = log_file.readlines()
+                for line in lines:
+                    if find_level_merged(line) == level:
+                        print(line)
+                        classification = find_classification(line)
+                        img = cv2.imread(os.path.join(data_CHIC_dir,f))
+                        picture.show_opened_image(img, caption = classification)
+
+
+
+
+    return 0
+
+
+
+
+
+
+def classify(value):
+    if value >= 90:
+        s = "Very Good visibility"
+    elif ((value < 90) and (value >=75)):
+        s = "Good visibility"
+    elif ((value < 75) and (value >=50)):
+        s = "Foggy"
+    elif ((value < 50) and (value >20)):
+        s = "Heavy Fog"
+    else:
+        s = "Extremly Bad Fog"
+    return s
+
+def find_percentage(line):
+    result = float(re.search("result of (.+?)%", line).group(1))
+    return result
+
+def find_classification(line):
+    result = re.search(" which means (.+?) \n", line).group(1)
+    return result
+
+def find_level_unmerged(line):
+    try:
+        result = re.search("IM_(.+?).jpg",  line).group(1)
+    except AttributeError as e:
+        result = "Original(without_fog)"
+    return result
+
+def find_level_merged(line):
+    try:
+        result = re.search("(.+?) average",line).group(1)
+    except AttributeError as e:
+        result = "Original(without_fog)"
+    return result
+
+def merge_results():
+    res_list =np.zeros(21) # list for results
+    with open("merged_logs.txt", "w") as log_file:
+        for f in os.listdir(root_dir):
+            if ((f.endswith('.txt')) and (f!="merged_logs.txt")):
+                with open(os.path.join(root_dir,f)) as opened_logs:
+                    whole_text = list(opened_logs)
+                    for i in range(len(whole_text)):
+                        try:
+                            found = find_percentage(whole_text[i])
+                            res_list[i]+=found
+                        except Exception as e:
+                            print(e)
+
+        res_list= res_list/4
+        file_list = os.listdir(data_CHIC_dir)
+        file_list.sort()
+        i=0
+        for f in file_list:
+            try:
+                found = find_level_unmerged(f)
+                description = classify(res_list[i])
+                s = ("{} average result of {}% which means {} \n".format(found,res_list[i], description))
+                log_file.write(s)
+                i+=1
+            except Exception as e:
+                print(e)
 
 
 if __name__ == '__main__':

@@ -4,9 +4,9 @@ import os
 from matplotlib import pyplot as plt
 import cv2
 
-def show_opened_image(image):
+def show_opened_image(image, caption="image"):
 
-    cv2.imshow('image',image)
+    cv2.imshow(caption,image)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
