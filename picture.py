@@ -100,7 +100,7 @@ def segmentation(data_dir, f, debug_mode = 0):
     if debug_mode == 1:
         show_opened_image(img)
 
-def WhiteAnd3d(img1, img2,debug_mode = 0):
+def White_Intersection_3d(img1, img2,debug_mode = 0):
     #Do union of 3d matrixes for white color
     if debug_mode ==1:
         print(img1.shape)

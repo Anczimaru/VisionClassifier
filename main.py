@@ -59,20 +59,20 @@ def main(debug_mode=0, full_run = 0):
 
         with open("log_edge.txt","w") as log_file:
             print("Evaluating edges")
-            evaluate_union(edges_dir, s_base_edge_name, log_file)
+            evaluate_intersection(edges_dir, s_base_edge_name, log_file)
 
         with open("log_laplacian.txt","w") as log_file:
             print("Evaluating laplacian")
-            evaluate_union(laplacian_dir,s_base_laplace_name,log_file)
+            evaluate_intersection(laplacian_dir,s_base_laplace_name,log_file)
 
         with open("log_sobel_x.txt","w") as log_file:
             print("Evaluating sobel_x")
-            evaluate_union(sobel_x_dir,s_base_sobel_x_name,log_file)
+            evaluate_intersection(sobel_x_dir,s_base_sobel_x_name,log_file)
 
 
         with open("log_sobel_y.txt","w") as log_file:
             print("Evaluating sobel_y")
-            evaluate_union(sobel_y_dir,s_base_sobel_y_name,log_file)
+            evaluate_intersection(sobel_y_dir,s_base_sobel_y_name,log_file)
 
 
         log_file.close()
@@ -123,7 +123,7 @@ def baseline_avg_CHIC(src_dir, dst_dir,name, debug_mode=0):
                 avg_img = temp_img
                 FLAG_1ST_MATRIX+=1
             else:
-                avg_img = picture.WhiteAnd3d(avg_img,temp_img,debug_mode=debug_mode)
+                avg_img = picture.White_Intersection_3d(avg_img,temp_img,debug_mode=debug_mode)
     print("Extracted baseline picture")
     if debug_mode == 1:
         picture.show_opened_image(avg_img)
@@ -132,7 +132,7 @@ def baseline_avg_CHIC(src_dir, dst_dir,name, debug_mode=0):
     temp_img.save(os.path.join(dst_dir, name))
 
 @timing
-def evaluate_union(src_dir, baseline_picture,log_file, debug_mode = 0):
+def evaluate_intersection(src_dir, baseline_picture,log_file, debug_mode = 0):
 
     #ESTABLISH BASELINE
     #print("Preparing baseline")
@@ -152,10 +152,10 @@ def evaluate_union(src_dir, baseline_picture,log_file, debug_mode = 0):
     list.sort() # LIST SORT == IMPORTANT THING!
     similarity_multiplier = 0
     res_list = []
-    #EXTRACT UNION
+    #EXTRACT intersection
     for f in list:
         temp_pic = cv2.imread(os.path.join(src_dir,f))
-        #calculate union
+        #calculate intersection
         res_pic = cv2.bitwise_and(base_img,temp_pic)
         res_pic_gray = cv2.cvtColor(res_pic, cv2.COLOR_BGR2GRAY)
         if debug_mode == 1:
