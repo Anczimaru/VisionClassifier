@@ -82,6 +82,7 @@ def main(debug_mode=0, full_run = 0):
             picture.feature_matcher(data_CHIC_dir, feature_dir, f, checker_img_path, mode = 1)
             picture.feature_matcher(data_CHIC_dir, feature_dir, f, checker_img_path, mode = 2)
     merge_results()
+    ##### LevelXX(inside_light), LevelXX, Level10(without_fog/without_fog, inside_light), Original(without_fog)
     show_result_on_picture("Level10(without_fog)")
     show_result_on_picture("Level01")
     show_result_on_picture("Level05")
@@ -122,7 +123,7 @@ def baseline_avg_CHIC(src_dir, dst_dir,name, debug_mode=0):
                 avg_img = temp_img
                 FLAG_1ST_MATRIX+=1
             else:
-                avg_img = picture.whiteunion3d(avg_img,temp_img,debug_mode=debug_mode)
+                avg_img = picture.WhiteAnd3d(avg_img,temp_img,debug_mode=debug_mode)
     print("Extracted baseline picture")
     if debug_mode == 1:
         picture.show_opened_image(avg_img)
@@ -185,7 +186,7 @@ def evaluate_union(src_dir, baseline_picture,log_file, debug_mode = 0):
 
     return 0
 
-def show_result_on_picture(index):
+def show_result_on_picture(index,save=0):
     for f in os.listdir(data_CHIC_dir):
         level = find_level_unmerged(f)
         if level == index:
@@ -197,7 +198,6 @@ def show_result_on_picture(index):
                         classification = find_classification(line)
                         img = cv2.imread(os.path.join(data_CHIC_dir,f))
                         picture.show_opened_image(img, caption = classification)
-
 
 
 
