@@ -17,7 +17,7 @@ laplacian_demo_dir = os.path.join(data_demo_dir,"laplacian")
 sobel_x_demo_dir = os.path.join(data_demo_dir,"sobel_x")
 sobel_y_demo_dir = os.path.join(data_demo_dir,"sobel_y")
 
-root_dir = os.path.join(".","main_datasource")
+root_dir = os.path.join(".","main")
 data_dir = os.path.join(root_dir,'data')
 image_dir = os.path.join(data_dir,"source_images")
 baseline_src_dir = os.path.join(data_dir,"baseline_orginal")

@@ -1,18 +1,16 @@
 import picture
 import numpy as np
-import sys
 import os
 from PIL import Image
 import cv2
-from matplotlib import pyplot as plt
 from functools import wraps
 from time import time
-import re
+import shutil
 import config
-import demo
-
+import re
 
 ###############################################################################
+#wrapper for time measurment
 def timing(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
@@ -28,20 +26,30 @@ def timing(f):
 
 
 def main():
+    flag_new_dir = 0
     for f in config.directories:
         if not os.path.exists(f):
+            flag_new_dir =1
             os.mkdir(f)
             s = "Making directory {}".format(f)
-            print("Please place data in proper folders, then run program again")
-            return 0
+    if (flag_new_dir == 1):
+        print("Please place data in proper folders, then run program again")
+        return 0
 
     prepare_data(picture.canny_edge_detector, config.image_dir, config.edges_dir, config.data_dir)
+    baseline_avg(picture.canny_edge_detector, config.baseline_src_dir, config.data_dir, config.s_base_edge_name)
+
+
 
     prepare_data(picture.laplacian, config.image_dir, config.laplacian_dir, config.data_dir)
+    baseline_avg(picture.laplacian, config.baseline_src_dir, config.data_dir, config.s_base_laplace_name)
+
 
     prepare_data(picture.sobel_x, config.image_dir, config.sobel_x_dir, config.data_dir)
+    baseline_avg(picture.sobel_x, config.baseline_src_dir, config.data_dir, config.s_base_sobel_x_name)
 
     prepare_data(picture.sobel_y, config.image_dir, config.sobel_y_dir, config.data_dir)
+    baseline_avg(picture.sobel_y, config.baseline_src_dir, config.data_dir, config.s_base_sobel_y_name)
 
 
     with open(os.path.join(config.root_dir,"log_edge.txt"),"w") as log_file:
@@ -67,9 +75,13 @@ def main():
     print("Done")
 
 ################################################################################
-def prepare_data(function, src_dir, dst_dir, s_base_pic_name, data_dir, debug_mode = 0):
-    if len(os.listdir(dst_dir)) == 0:
-        s_msg = "Empty {} , preparing data".format(dst_dir)
+def prepare_data(function, src_dir, dst_dir, data_dir, debug_mode = 0):
+    src_photos = os.listdir(src_dir)
+    dst_photos = os.listdir(dst_dir)
+    if (len(dst_photos) < len(src_photos)):
+        shutil.rmtree(dst_dir)
+        os.mkdir(dst_dir)
+        s_msg = "{} , preparing data".format(dst_dir)
         print(s_msg)
         list = os.listdir(src_dir)
         for f in list:
@@ -77,19 +89,30 @@ def prepare_data(function, src_dir, dst_dir, s_base_pic_name, data_dir, debug_mo
 
 
 ################################################################################
-def baseline_avg():
-    for s_base_pic_name in config.baseline_names:
-        baseline_picture = os.path.join(data_dir,s_base_pic_name)
-        if not os.path.exists(baseline_picture):
-            baseline_avg(dst_dir, data_dir, s_base_pic_name, debug_mode=debug_mode)
+def baseline_avg(function, src_dir, dst_dir, name,debug_mode = 0):
+    baseline_picture = os.path.join(dst_dir,name)
+    if not os.path.exists(baseline_picture):
+        if debug_mode == 1:
+            print(function)
+        ##### CREATE BASELINE NOW
+        FLAG_1ST_MATRIX = 0
+        for f in os.listdir(src_dir):
+            temp_img = function(src_dir, dst_dir, f, save =0, debug_mode = debug_mode)
+            if FLAG_1ST_MATRIX == 0:
+                avg_img = temp_img
+                FLAG_1ST_MATRIX+=1
+            else:
+                avg_img = picture.White_Intersection_3d(avg_img,temp_img, debug_mode = debug_mode)
 
+        print("Extracted baseline picture")
+        temp_img = Image.fromarray(avg_img)
+        temp_img.save(os.path.join(dst_dir, name))
 
 ################################################################################
 @timing
 def evaluate_intersection(src_dir, baseline_picture,log_file,data_dir, debug_mode = 0):
 
-    #ESTABLISH BASELINE
-    #print("Preparing baseline")
+
     base_img = cv2.imread(os.path.join(data_dir,baseline_picture))
     print(os.path.join(data_dir,baseline_picture))
     base_img_gray = cv2.cvtColor(base_img, cv2.COLOR_BGR2GRAY)
@@ -105,8 +128,8 @@ def evaluate_intersection(src_dir, baseline_picture,log_file,data_dir, debug_mod
     #GET DATA
     list = os.listdir(src_dir)
     list.sort() # LIST SORT == IMPORTANT THING!
-    similarity_multiplier = 0
-    res_list = []
+    res_names = []
+    res_values = []
     #EXTRACT intersection
     for f in list:
         temp_pic = cv2.imread(os.path.join(src_dir,f))
@@ -121,21 +144,20 @@ def evaluate_intersection(src_dir, baseline_picture,log_file,data_dir, debug_mod
             for y in range(res_pic_gray.shape[1]):
                 if res_pic_gray[x,y] >=1: similarity+=1
 
+
         similarity_percentage = similarity/base_pixels
+        res_names.append(f)
+        res_values.append(similarity_percentage)
 
-        #calculate coefficient
-        a = int("".join(filter(str.isdigit, f)))
-        if (a == 1 or a==110):
-            similarity_multiplier +=similarity_percentage
 
-        res_list.append((f,similarity_percentage))
-    similarity_multiplier = 100/(similarity_multiplier/3)
-    print(similarity_multiplier)
+
+    #find similarity_multiplier
+
+    multiplier = 100/max(res_values)
 
     #WRITE RESULTS TO LOG FILES
-    for i in range(len(res_list)):
-        a = res_list[i]
-        s_results = ("For picture {} we got result of {}% against baseline \n".format(a[0],a[1]*similarity_multiplier))
+    for i in range(len(res_names)):
+        s_results = ("For picture {} we got result of {}% against baseline \n".format(res_names[i],res_values[i]*multiplier))
         log_file.write(s_results)
 
 

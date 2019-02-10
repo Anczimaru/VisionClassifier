@@ -22,20 +22,26 @@ def my_canny(img, param=0.33):
 
 def sobel_x(data_dir, dst_dir, f, save=1, debug_mode = 0):
     img = cv2.imread(os.path.join(data_dir,f),0)
-    sobel_x = cv2.Sobel(img,cv2.CV_64F,1,0,ksize=5)
+    sobel_x = cv2.Sobel(img,cv2.CV_8U,1,0,ksize=5)
     s = "sobel_x_{}".format(f)
     if save == 1:
         cv2.imwrite(os.path.join(dst_dir,s),sobel_x)
-    else: return sobel_x
+    else:
+        img_cv = cv2.resize(sobel_x,(sobel_x.shape[1],sobel_x.shape[0]))
+        return cv2.cvtColor(img_cv, cv2.COLOR_GRAY2BGR)
 
 
 def sobel_y(data_dir, dst_dir, f, save=1, debug_mode = 0):
     img = cv2.imread(os.path.join(data_dir,f),0)
-    sobel_y = cv2.Sobel(img,cv2.CV_64F,0,1,ksize=5)
+    sobel_y = cv2.Sobel(img,cv2.CV_8U,0,1,ksize=5)
     s = "sobel_y_{}".format(f)
     if save == 1:
         cv2.imwrite(os.path.join(dst_dir,s),sobel_y)
-    else: return sobel_y
+    else:
+        print(sobel_y.size)
+        print(type(sobel_y))
+        img_cv = cv2.resize(sobel_y,(sobel_y.shape[1],sobel_y.shape[0]))
+        return cv2.cvtColor(img_cv, cv2.COLOR_GRAY2BGR)
 
 def canny_edge_detector(data_dir, dst_dir, f, save=1, auto = 1, debug_mode = 0):
 
@@ -52,10 +58,14 @@ def canny_edge_detector(data_dir, dst_dir, f, save=1, auto = 1, debug_mode = 0):
     tmp_img = Image.fromarray(edges)
     if save == 1:
         tmp_img.save(os.path.join(dst_dir, s))
-    else: return tmp_img
+    else:
+        img_cv = cv2.resize(edges,(edges.shape[1],edges.shape[0]))
+        return cv2.cvtColor(img_cv, cv2.COLOR_GRAY2BGR)
+
+
 
 def laplacian(data_dir, dst_dir, f, save=1, debug_mode = 0):
-    ddepth = cv2.CV_16S
+    ddepth = cv2.CV_8U
     kernel_size=5
     img = cv2.imread(os.path.join(data_dir,f),-1)
     # Remove noise by blurring with a Gaussian filter
@@ -67,13 +77,14 @@ def laplacian(data_dir, dst_dir, f, save=1, debug_mode = 0):
         print(laplacian.shape)
     if save == 1:
         cv2.imwrite(os.path.join(dst_dir,s),laplacian)
-    else: return laplacian
+    else:
+        img_cv = cv2.resize(laplacian,(laplacian.shape[1],laplacian.shape[0]))
+        return cv2.cvtColor(img_cv, cv2.COLOR_GRAY2BGR)
 
 
-def White_Intersection_3d(img1, img2,debug_mode = 0):
+def White_Intersection_3d(img1, img2,debug_mode = 1):
     #Do union of 3d matrixes for white color
-    if debug_mode ==1:
-        print(img1.shape)
+
     hsv1 = cv2.cvtColor(img1, cv2.COLOR_BGR2HSV)
     hsv2 = cv2.cvtColor(img2, cv2.COLOR_BGR2HSV)
 
