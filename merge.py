@@ -18,14 +18,17 @@ def classify(value):
         s = "Extremly Bad Fog"
     return s
 
+#Find percentage based on log contruction
 def find_percentage(line):
     result = float(re.search("result of (.+?)%", line).group(1))
     return result
 
+#Find classification from merged log file
 def find_classification(line):
     result = re.search(" which means (.+?) \n", line).group(1)
     return result
 
+#Find level/unique id in unmerged logs
 def find_level_unmerged(line):
     try:
         result = re.search("IM_(.+?).jpg",  line).group(1)
@@ -33,6 +36,8 @@ def find_level_unmerged(line):
         result = "Original(without_fog)"
     return result
 
+
+#Find unique id in merged log file
 def find_level_merged(line):
     try:
         result = re.search("(.+?) average",line).group(1)
@@ -43,26 +48,26 @@ def find_level_merged(line):
 
 def merge_results(root_dir, data_dir):
     res_list =np.zeros(len(os.listdir(data_dir))) # list for results
-    with open(os.path.join(root_dir,"merged_logs.txt"), "w") as log_file:
-        for f in os.listdir(root_dir):
-            if ((f.endswith('.txt')) and (f!="merged_logs.txt")):
-                with open(os.path.join(root_dir,f)) as opened_logs:
-                    whole_text = list(opened_logs)
-                    for i in range(len(whole_text)):
-                        try:
-                            found = find_percentage(whole_text[i])
-                            res_list[i]+=found
+    with open(os.path.join(root_dir,"merged_logs.txt"), "w") as log_file: #open/create logs
+        for f in os.listdir(root_dir): #get file list
+            if ((f.endswith('.txt')) and (f!="merged_logs.txt")): #get .txt so log files from list
+                with open(os.path.join(root_dir,f)) as opened_logs: #open proper logs
+                    whole_text = list(opened_logs) #get logs to list, by lines
+                    for i in range(len(whole_text)): #iterate over lines
+                        try:  
+                            found = find_percentage(whole_text[i]) #find percentage
+                            res_list[i]+=found #add it to list
                         except Exception as e:
                             print(e)
 
-        res_list= res_list/4
-        file_list = os.listdir(data_dir)
-        file_list.sort()
-        i=0
-        for f in file_list:
+        res_list= res_list/4 #average results by number of files
+        file_list = os.listdir(data_dir) #get list of photos
+        file_list.sort() #sort indexes of photos
+        i=0 #iterator
+        for f in file_list: #save results in proper order
             try:
                 found = find_level_unmerged(f)
-                description = classify(res_list[i])
+                description = classify(res_list[i]) #classify obtained results
                 s = ("{} average result of {}% which means {} \n".format(found,res_list[i], description))
                 log_file.write(s)
                 i+=1
@@ -70,6 +75,7 @@ def merge_results(root_dir, data_dir):
                 print(e)
 
 def show_result_on_picture(index, src_dir, root_dir= config.root_dir):
+    #Show picture with name format ".....IM_index.jpg" where index is unique id of photo 
     for f in os.listdir(src_dir):
         level = find_level_unmerged(f)
         if level == index:

@@ -8,15 +8,7 @@ _all_ = ('root_dir',"data_dir", "data_CHIC_dir",
         "feature_dir", "directories", " s_base_edge_name", "s_base_laplace_name"
         "s_base_sobel_x_name", "s_base_sobel_y_name")
 
-
-root_demo_dir = os.path.join(".","demo")
-data_demo_dir = os.path.join(root_demo_dir,'data')
-data_CHIC_demo_dir = os.path.join(data_demo_dir,'data_CHIC')
-edges_demo_dir = os.path.join(data_demo_dir,"edges")
-laplacian_demo_dir = os.path.join(data_demo_dir,"laplacian")
-sobel_x_demo_dir = os.path.join(data_demo_dir,"sobel_x")
-sobel_y_demo_dir = os.path.join(data_demo_dir,"sobel_y")
-
+#PATHS TO DIRECTORIES
 root_dir = os.path.join(".","main")
 data_dir = os.path.join(root_dir,'data')
 image_dir = os.path.join(data_dir,"source_images")
@@ -27,10 +19,10 @@ sobel_x_dir = os.path.join(data_dir,"sobel_x")
 sobel_y_dir = os.path.join(data_dir,"sobel_y")
 
 
-
+#DIR LIST
 directories = (root_dir, data_dir, image_dir, baseline_src_dir, edges_dir, laplacian_dir, sobel_x_dir, sobel_y_dir)
 
-directories_demo = (root_demo_dir,data_dir, edges_demo_dir, laplacian_demo_dir,sobel_x_demo_dir, sobel_y_demo_dir)
+#Baseline pictures names
 s_base_edge_name = "baseline_edge_picture.jpg"
 s_base_laplace_name = "baseline_laplace_picture.jpg"
 s_base_sobel_x_name = "baseline_sobelx_picture.jpg"

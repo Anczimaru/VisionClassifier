@@ -1,7 +1,6 @@
 from PIL import Image
 import numpy as np
 import os
-from matplotlib import pyplot as plt
 import cv2
 
 def show_opened_image(image, caption="image"):
@@ -38,8 +37,6 @@ def sobel_y(data_dir, dst_dir, f, save=1, debug_mode = 0):
     if save == 1:
         cv2.imwrite(os.path.join(dst_dir,s),sobel_y)
     else:
-        print(sobel_y.size)
-        print(type(sobel_y))
         img_cv = cv2.resize(sobel_y,(sobel_y.shape[1],sobel_y.shape[0]))
         return cv2.cvtColor(img_cv, cv2.COLOR_GRAY2BGR)
 
